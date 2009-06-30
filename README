@@ -1,0 +1,31 @@
+NAME
+    Finance::Bank::LloydsTSB - Check your bank accounts from Perl
+
+SYNOPSIS
+      use Finance::Bank::LloydsTSB;
+      for (Finance::Bank::LloydsTSB->check_balance(
+            username=> $username,
+            password=> $password)) {
+          printf "%20s : %8s / %8s : GBP %9.2f\n", 
+                 $_->name, $_->sort_code, $_->account_no, $_->balance;
+      }
+
+DESCRIPTION
+    This module provides a rudimentary interface to the LloydsTSB online
+    banking system at "https://online.lloydstsb.co.uk/". You will need
+    either "Crypt::SSLeay" or "IO::Socket::SSL" installed for HTTPS support
+    to work with LWP. The only method it currently provides is
+    "check_balance", which returns a list of account objects, each of which
+    can be queried for name, sort code, account number and balance as shown
+    above. Eventually it may acquire online payment capability.
+
+WARNING
+    This is code for online banking, and that means your money, and that
+    means BE CAREFUL. You are encouraged, nay, expected, to audit the source
+    of this module yourself to reassure yourself that I am not doing
+    anything untoward with your banking data. This software is useful to me,
+    but is provided under NO GUARANTEE, explicit or implied.
+
+AUTHOR
+    Simon Cozens "simon@cpan.org"
+
