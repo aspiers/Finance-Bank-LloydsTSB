@@ -1,9 +1,9 @@
 package Finance::Bank::LloydsTSB;
 use strict;
 use Carp;
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 use LWP::UserAgent;
-my $ua = LWP::UserAgent->new(
+our $ua = LWP::UserAgent->new(
     env_proxy => 1, 
     keep_alive => 1, 
     timeout => 30,
@@ -65,15 +65,25 @@ sub check_balance {
             sort_code  => $line[1],
             account_no => $line[2],
             parent     => $self
-        }, "Finance::Banking::LloydsTSB::Account");
+        }, "Finance::Bank::LloydsTSB::Account");
     }
     return @accounts;
 }
 
-package Finance::Banking::LloydsTSB::Account;
+package Finance::Bank::LloydsTSB::Account;
 # Basic OO smoke-and-mirrors Thingy
 no strict;
 sub AUTOLOAD { my $self=shift; $AUTOLOAD =~ s/.*:://; $self->{$AUTOLOAD} }
+
+sub statement {
+    my $ac = shift;
+    my $code;
+    ($code = $ac->sort_code.$ac->account_no) =~ s/\D//g;
+    my $stm = $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statement.ibc?Account=$code");
+    $stm = $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statment.stm?Account=$code");
+    croak unless $stm->is_success;
+    return $stm->content;
+}
 
 
 # This code stolen from Jonathan Stowe <gellyfish@gellyfish.com>
@@ -154,10 +164,33 @@ Finance::Bank::LloydsTSB - Check your bank accounts from Perl
 This module provides a rudimentary interface to the LloydsTSB online
 banking system at C<https://online.lloydstsb.co.uk/>. You will need
 either C<Crypt::SSLeay> or C<IO::Socket::SSL> installed for HTTPS
-support to work with LWP. The only method it currently provides is
-C<check_balance>, which returns a list of account objects, each of which
-can be queried for name, sort code, account number and balance as shown
-above. Eventually it may acquire online payment capability.
+support to work with LWP. 
+
+=head1 CLASS METHODS
+
+    check_balance(username => $u, password => $p)
+
+Return a list of account objects, one for each of your bank accounts.
+
+=head1 ACCOUNT OBJECT METHODS
+
+    $ac->name
+    $ac->sort_code
+    $ac->account_no
+
+Return the name of the account, the sort code formatted as the familiar
+XX-YY-ZZ, and the account number.
+
+    $ac->balance
+
+Return the balance as a signed floating point value.
+
+    $ac->statement
+
+Return a mini-statement as a line-separated list of transactions.
+Each transaction is a comma-separated list. B<WARNING>: this interface
+is currently only useful for display, and hence may change in later
+versions of this module.
 
 =head1 WARNING
 
