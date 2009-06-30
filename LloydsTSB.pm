@@ -1,52 +1,48 @@
 package Finance::Bank::LloydsTSB;
 use strict;
 use Carp;
-our $VERSION = '1.01';
-use LWP::UserAgent;
-our $ua = LWP::UserAgent->new(
+our $VERSION = '1.2';
+use WWW::Mechanize;
+our $ua = WWW::Mechanize->new(
     env_proxy => 1, 
     keep_alive => 1, 
     timeout => 30,
-    cookie_jar=> {},
-    agent => "Mozilla/4.0 (compatible; MSIE 5.12; Atari ST)"
 ); 
 
 sub check_balance {
     my ($class, %opts) = @_;
     croak "Must provide a password" unless exists $opts{password};
     croak "Must provide a username" unless exists $opts{username};
+    croak "Must provide memorable information" unless exists $opts{memorable};
 
     my $self = bless { %opts }, $class;
 
-    my $orig_r = $ua->get("https://online.lloydstsb.co.uk/customer.ibc");
-    croak $orig_r->error_as_HTML unless $orig_r->is_success;
+    $ua->get("https://online.lloydstsb.co.uk/customer.ibc");
+    my $field = $ua->current_form->find_input("UserId1");
+    $field->{type}="input";
+    bless $field, "HTML::Form::TextInput";
+    $ua->field(UserId1  => $opts{username});
+    $ua->field(Password => $opts{password});
+    $ua->click;
 
-    my $orig = $orig_r->content;
-    my $key;
+    # Now we're at the new "memorable information" page, so parse that
+    # and input the right form data.
 
-    $orig =~ /name="Key" type="HIDDEN" value="(\d+)"/ 
-        or croak "Couldn't parse key!";
-    $key = $1;
-    my $check = $ua->post("https://online.lloydstsb.co.uk/customer.ibc", {
-        Key => $key,
-        LOGONPAGE => "LOGONPAGE",
-        UserId1 => $opts{username},
-        Password => $opts{password},
-       });
+    for (0..2) {
+        my $key;
+        eval { $key = $ua->current_form->find_input("ResponseKey$_")->value; };
+        croak "Couldn't log in; check your password and username" if $@;
+        my $value = substr(lc $opts{memorable}, $key-1, 1);
+        $ua->field("ResponseValue$_" => $value);
+    }
 
-    # $check currently contains a redirect, but we can't ask LWP to
-    # automatically redirect because Lloyds are EVIL EVIL BUGGERS, who change
-    # from POST to GET during a redirect, which is against the HTTP/1.1
-    # spec and so LWP doesn't support it.
-
-    # So, we send it again as a GET.
-    
-    $check = $ua->get("https://online.lloydstsb.co.uk/customer.ibc?Password=$opts{password}&UserId1=$opts{username}");
+    my $response = $ua->click;
+    $ua->get($response->{_headers}->{location});
 
     # Now we have the data, we need to parse it.
 
     my $foo = new TableThing;
-    $foo->parse($check->content);
+    $foo->parse($ua->content);
 
     # Extracts the HTML table of accounts.
     my @table = @{$foo->{Table}};
@@ -58,7 +54,7 @@ sub check_balance {
         my @line = grep{/\S/} @$_;
         my $balance = pop @line;
         $balance =~ s/ CR//;
-        $balance = "-$balance" if $balance =~ s/ DB//;
+        $balance = "-$balance" if $balance =~ s/ DR//;
         push @accounts, (bless {
             balance    => $balance,
             name       => $line[0],
@@ -79,10 +75,9 @@ sub statement {
     my $ac = shift;
     my $code;
     ($code = $ac->sort_code.$ac->account_no) =~ s/\D//g;
-    my $stm = $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statement.ibc?Account=$code");
-    $stm = $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statment.stm?Account=$code");
-    croak unless $stm->is_success;
-    return $stm->content;
+    $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statement.ibc?Account=$code");
+    $Finance::Bank::LloydsTSB::ua->get("https://online.lloydstsb.co.uk/statment.stm?Account=$code");
+    return $ua->content;
 }
 
 
@@ -153,8 +148,9 @@ Finance::Bank::LloydsTSB - Check your bank accounts from Perl
 
   use Finance::Bank::LloydsTSB;
   for (Finance::Bank::LloydsTSB->check_balance(
-        username=> $username,
-        password=> $password)) {
+        username  => $username,
+        password  => $password
+        memorable => $memorable_phrase )) {
       printf "%20s : %8s / %8s : GBP %9.2f\n", 
              $_->name, $_->sort_code, $_->account_no, $_->balance;
   }
@@ -164,11 +160,11 @@ Finance::Bank::LloydsTSB - Check your bank accounts from Perl
 This module provides a rudimentary interface to the LloydsTSB online
 banking system at C<https://online.lloydstsb.co.uk/>. You will need
 either C<Crypt::SSLeay> or C<IO::Socket::SSL> installed for HTTPS
-support to work with LWP. 
+support to work with LWP.
 
 =head1 CLASS METHODS
 
-    check_balance(username => $u, password => $p)
+    check_balance(username => $u, password => $p, memorable => $m)
 
 Return a list of account objects, one for each of your bank accounts.
 
