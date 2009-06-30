@@ -14,7 +14,7 @@ requires:
 provides:
   Finance::Bank::LloydsTSB:
     file: lib/Finance/Bank/LloydsTSB.pm
-    version: 1.31
+    version: 1.30
   Finance::Bank::LloydsTSB::Account:
     file: lib/Finance/Bank/LloydsTSB/Account.pm
   Finance::Bank::LloydsTSB::Statement:

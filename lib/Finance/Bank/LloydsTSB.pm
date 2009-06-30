@@ -35,7 +35,7 @@ use warnings;
 
 use Carp;
 
-our $VERSION = '1.3';
+our $VERSION = '1.30';
 our $DEBUG = 0;
 
 use Carp qw(carp cluck croak confess);
