@@ -1,6 +1,9 @@
 Changes
-LloydsTSB.pm
-Makefile.PL
+lib/Finance/Bank/LloydsTSB.pm
+lib/Finance/Bank/LloydsTSB/Account.pm
+lib/Finance/Bank/LloydsTSB/Statement.pm
+Build.PL
 MANIFEST
 README
 test.pl
+META.yml

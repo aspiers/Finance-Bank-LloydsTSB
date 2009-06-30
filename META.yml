@@ -1,0 +1,8 @@
+--- #YAML:1.0
+name: Finance-Bank-LloydsTSB
+version: 1.2
+author:
+
+abstract: Check your bank accounts from Perl
+license: perl
+generated_by: Module::Build version 0.2612, without YAML.pm
