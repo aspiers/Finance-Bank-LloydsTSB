@@ -1,5 +1,12 @@
 Revision history for Perl extension Finance::Bank::LloydsTSB.
 
+1.30  Fri Mar 28 17:30:29 2008
+    - update for latest version of website
+    - add some docs
+    - make website navigation more robust
+    - separate account list retrieval from statement retrieval
+    - add downloading of QIF for given time period
+
 1.01  Mon Jun 10 17:26:54 2002
     - added the "statement" method.
 
