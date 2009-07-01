@@ -1,6 +1,9 @@
 Revision history for Perl extension Finance::Bank::LloydsTSB.
 
-1.30  Fri Mar 28 17:30:29 2008
+1.31  2008-03-29 Sat 11:51:49 GMT
+    - add missing requirement on HTML::TreeBuilder
+
+1.30  2008-03-28 Fri 17:30:29 GMT
     - update for latest version of website
     - add some docs
     - make website navigation more robust
