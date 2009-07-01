@@ -102,8 +102,8 @@ sub get_accounts {
         $ua->click;
     }
 
-    croak "Failed memorable info stage:", $ua->content
-      unless $ua->content =~ /Account\s+list/i;
+    croak "Couldn't find account overview at memorable info stage:", $ua->content
+      unless $ua->content =~ /Account\s+Overview/;
 
     # Now we have the account list page; we need to parse it.
     my $te = new HTML::TableExtract(
