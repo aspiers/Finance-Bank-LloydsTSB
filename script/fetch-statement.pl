@@ -13,7 +13,10 @@ sub usage {
   (my $ME = $0) =~ s,.*/,,;
 
   die <<EOUSAGE;
-Usage: $ME [ACCOUNT [YEAR STARTMONTH [ENDMONTH]]]
+Usage:
+  $ME                                    show account overview
+  $ME ACCOUNT                            dump statement for account  
+  $ME ACCOUNT YEAR STARTMONTH [ENDMONTH] download monthly statements
 EOUSAGE
 }
 
