@@ -67,22 +67,26 @@ sub _login {
     my $self = shift;
 
     $ua->get("https://online.lloydstsb.co.uk/customer.ibc");
-    my $field = $ua->current_form->find_input("UserId1");
-    $field->{type}="input";
-    bless $field, "HTML::Form::TextInput";
+    my $form = $ua->current_form;
+    die "Couldn't get current_form" unless $form && $form->isa("HTML::Form");
+    my $field = $form->find_input("UserId1");
+    die "Couldn't find UserId1 input field" unless $field;
     $ua->field(UserId1  => $self->{username});
     $ua->field(Password => $self->{password});
     $ua->click;
 
+    croak "Couldn't log in; check your password and username\n" . $ua->content
+      unless $ua->content =~ /memorable\s+information/i;
+
     # Now we're at the new "memorable information" page, so parse that
     # and input the right form data.
 
-    for (0..2) {
+    for my $i (0..2) {
         my $key;
-        eval { $key = $ua->current_form->find_input("ResponseKey$_")->value; };
-        croak "Couldn't log in; check your password and username" if $@;
+        eval { $key = $ua->current_form->find_input("ResponseKey$i")->value; };
+        die "Couldn't find ResponseKey$i on memorable info page; has the login process changed?" if $@;
         my $value = substr(lc $self->{memorable}, $key-1, 1);
-        $ua->field("ResponseValue$_" => $value);
+        $ua->field("ResponseValue$i" => $value);
     }
 
     $ua->click;
@@ -113,6 +117,9 @@ sub get_accounts {
     croak "Couldn't find account overview at memorable info stage:", $ua->content
       unless $ua->content =~ /Account\s+Overview/;
 
+    my $html = $ua->content;
+    $html =~ s/&nbsp;?/ /g;
+
     # Now we have the account list page; we need to parse it.
     my $te = new HTML::TableExtract(
         headers => [
@@ -126,8 +133,6 @@ sub get_accounts {
         # a bug which includes start tag in the text segment.
         # keep_html => 1,
     );
-    my $html = $ua->content;
-    $html =~ s/&nbsp;?/ /g;
     $te->parse($html);
     my @tables = $te->tables;
     croak "HTML::TableExtract failed to find table:\n$html" unless @tables;
