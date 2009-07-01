@@ -1,6 +1,9 @@
 Revision history for Perl extension Finance::Bank::LloydsTSB.
 
-1.31  2008-04-03 Thu 00:13:18 BST
+1.33  2008-04-04 Fri 21:08:17 BST
+    - add utils.pm which was missing from MANIFEST - doh!
+
+1.32  2008-04-03 Thu 00:13:18 BST
     - add missing requirement on HTML::ElementTable
 
 1.31  2008-03-29 Sat 11:51:49 GMT
