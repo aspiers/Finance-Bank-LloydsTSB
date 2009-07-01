@@ -12,10 +12,16 @@ Finance::Bank::LloydsTSB - Check your bank accounts from Perl
         password  => $password
         memorable => $memorable_phrase
   );
+
+  my $total = 0;
+  my $format = "%20s : %21s : GBP %9.2f\n";
   for my $acc (@accounts) {
-    printf "%20s : %8s / %19s : GBP %9.2f\n",
-      $acc->name, ($acc->sort_code || ''), $acc->account_no, $acc->balance;
+    $total += $acc->balance;
+    printf $format, $acc->name, $acc->descr_num, $acc->balance;
   }
+  print "-" x 70, "\n";
+  printf $format, 'TOTAL', '', $total;
+
   my $statement = $accounts[0]->fetch_statement;
 
   # Retrieve QIF for all transactions in January 2008.
