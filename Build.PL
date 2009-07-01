@@ -13,6 +13,7 @@ Module::Build->new(
     'WWW::Mechanize'     => 0.39,
     'HTML::TableExtract' => 0,
     'HTML::TreeBuilder'  => 0,
+    'HTML::ElementTable' => 0,
   },
 #  script_files  => [ 'fetch-statement.pl' ],
 )->create_build_script;
