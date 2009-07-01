@@ -27,6 +27,8 @@ Finance::Bank::LloydsTSB - Check your bank accounts from Perl
   # Retrieve QIF for all transactions in January 2008.
   my $qif = $accounts[1]->download_statement(2008, 01, 01, 5);
 
+See F<fetch-statement.pl> for a working example.
+
 =head1 DESCRIPTION
 
 This module provides a rudimentary interface to the LloydsTSB online
