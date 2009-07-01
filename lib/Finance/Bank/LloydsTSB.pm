@@ -125,11 +125,10 @@ sub get_accounts {
     croak "HTML::TableExtract failed to find table" unless @tables;
     croak "HTML::TableExtract found >1 tables" unless @tables == 1;
 
-    my @accounts;
-
     my $acc_action_forms = $class->_get_acc_action_form_mapping;
 
     # Assume only one matching table using $te->rows shorthand
+    my @accounts;
     foreach my $row ($te->rows) {
         my ($descr, $balance, $OD_limit, $options) =
           map { $class->trim($_) } @$row;
@@ -139,14 +138,25 @@ sub get_accounts {
                 and $balance->find_by_attribute('class', 'prodDetail');
         my $link = $descr->find('a');
         my $name = $link->as_text;
+        $name =~ s/Lloyds TSB\s+//i;
         my $num = $class->trim($link->right->right);
-        croak "Couldn't parse sort code and a/c number in '$num'"
-          unless $num =~ /^(\d\d-\d\d-\d\d) (\d{6,10})$/;
-        my ($sort_code, $account_no) = ($1, $2);
 
+        my ($sort_code, $account_no, $descr_num, $terse_num);
+        if ($num =~ /^(\d\d-\d\d-\d\d) (\d{6,10})$/) {
+          ($sort_code, $account_no) = ($1, $2);
+          $descr_num = "$sort_code / $account_no";
+          $terse_num = "$sort_code$account_no";
+          $terse_num =~ tr/-//d;
+        }
+        elsif ($num =~ /^\d{4} \d{4} \d{4} \d{4}$/) {
+          $sort_code = undef;
+          $terse_num = $descr_num = $account_no = $num;
+          $terse_num =~ tr/ //d;
+        }
+        else {
+          croak "Couldn't parse '$num' as (sort code, a/c number) or c/c number\n";
+        }
         
-        my $terse_num = "$sort_code$account_no";
-        $terse_num =~ tr/-//d;
         my $form_index = $acc_action_forms->{$terse_num};
         if (exists $acc_action_forms->{$terse_num}) {
             $class->debug("Found form index $form_index for $terse_num\n");
@@ -158,7 +168,8 @@ sub get_accounts {
         push @accounts, (bless {
             ua         => $ua,
             name       => $name,
-            sort_code  => $sort_code,
+            sort_code  => $sort_code || undef,
+            descr_num  => $descr_num,
             account_no => $account_no,
             balance    => $class->normalize_balance($balance->as_trimmed_text),
 
@@ -196,7 +207,10 @@ sub _get_acc_action_form_mapping {
             next;
         }
         my $input = $form->find_input('Account', 'hidden');
-        die "no hidden 'Account' input found" unless $input;
+        if (! $input) {
+          $class->debug("skipping form $i since no hidden 'Account' input found\n");
+          next;
+        }
         my $num = $input->value; # this should be sortcode + acc #, no punctuation
         $acc_action_forms{$num} = $i;
         $class->debug("Form with hidden 'Account' input '$num' is number $i\n");

@@ -26,6 +26,7 @@ use Finance::Bank::LloydsTSB::utils qw(debug);
 
 sub ua         { shift->{ua}         }
 sub name       { shift->{name}       }
+sub descr_num  { shift->{descr_num}  }
 sub sort_code  { shift->{sort_code}  }
 sub account_no { shift->{account_no} }
 sub balance    { shift->{balance}    }
