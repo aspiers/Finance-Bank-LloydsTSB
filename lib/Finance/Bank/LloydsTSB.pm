@@ -275,7 +275,7 @@ to me, but is provided under B<NO GUARANTEE>, explicit or implied.
 
 =head1 AUTHORS
 
-Original by Simon Cozens C<simon@cpan.org>
+Original by Simon Cozens <simon@cpan.org>
 
 Improvements by Adam Spiers <aspiers@cpan.org>
 
