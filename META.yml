@@ -1,6 +1,6 @@
 ---
 name: Finance-Bank-LloydsTSB
-version: 1.33
+version: 1.34
 author:
   - 'Original by Simon Cozens <simon@cpan.org>'
   - 'Improvements by Adam Spiers <aspiers@cpan.org>'
@@ -16,14 +16,14 @@ requires:
 provides:
   Finance::Bank::LloydsTSB:
     file: lib/Finance/Bank/LloydsTSB.pm
-    version: 1.33
+    version: 1.34
   Finance::Bank::LloydsTSB::Account:
     file: lib/Finance/Bank/LloydsTSB/Account.pm
   Finance::Bank::LloydsTSB::Statement:
     file: lib/Finance/Bank/LloydsTSB/Statement.pm
   Finance::Bank::LloydsTSB::utils:
     file: lib/Finance/Bank/LloydsTSB/utils.pm
-generated_by: Module::Build version 0.2808
+generated_by: Module::Build version 0.280801
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
