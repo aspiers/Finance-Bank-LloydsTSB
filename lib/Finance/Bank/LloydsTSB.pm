@@ -122,7 +122,7 @@ sub get_accounts {
     $html =~ s/&nbsp;?/ /g;
     $te->parse($html);
     my @tables = $te->tables;
-    croak "HTML::TableExtract failed to find table" unless @tables;
+    croak "HTML::TableExtract failed to find table:\n$html" unless @tables;
     croak "HTML::TableExtract found >1 tables" unless @tables == 1;
 
     my $acc_action_forms = $class->_get_acc_action_form_mapping;
