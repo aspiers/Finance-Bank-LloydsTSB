@@ -93,6 +93,11 @@ sub download_months {
     );
 
     my $file = sprintf "%s-%s-%02d+1.qif", $account->account_no, $year, $month;
+    if ($content_type ne 'text/x-qif') {
+      (my $ext = $content_type) =~ s!.*/!!;
+      $file =~ s/qif$/$ext/;
+    }
+
     open(FH, ">$file")
       or die "Couldn't open(>$file): $!\n";
     print FH $qif;
