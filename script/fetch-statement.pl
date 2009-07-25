@@ -14,15 +14,34 @@ sub usage {
 
   die <<EOUSAGE;
 Usage:
-  $ME                                    show account overview
-  $ME ACCOUNT                            dump statement for account  
-  $ME ACCOUNT YEAR STARTMONTH [ENDMONTH] download monthly statements
+  $ME [options]                                    show account overview
+  $ME [options] ACCOUNT                            dump statement for account  
+  $ME [options] ACCOUNT YEAR STARTMONTH [ENDMONTH] download monthly statements
+
+Options:
+  -d, --debug
 EOUSAGE
 }
 
+use Getopt::Long;
+
+Getopt::Long::Configure('bundling');
+
+my %opts = ( debug => 0 );
+GetOptions(
+  \%opts,
+  'help|h',
+  'debug|d',
+) or usage();
+
+usage() if $opts{help};
 usage() unless @ARGV == 0 or @ARGV == 1 or (@ARGV >= 3 and @ARGV <= 4);
-usage() if @ARGV and ($ARGV[0] eq '-h' or $ARGV[0] eq '--help');
 my ($account_name, $year, $start_month, $end_month) = @ARGV;
+
+if ($opts{debug}) {
+  $Finance::Bank::LloydsTSB::DEBUG = 1;
+  $Finance::Bank::LloydsTSB::Account::DEBUG = 1;
+}
 
 my $term = new Term::ReadLine $0;
 my $username  = $ENV{LTSB_USERNAME}  || $term->readline('User ID: ');
