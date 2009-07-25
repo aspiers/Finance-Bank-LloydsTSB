@@ -60,6 +60,8 @@ our $ua = WWW::Mechanize->new(
     autocheck  => 1,
 ); 
 
+our $logged_in = 0;
+
 =head1 CLASS METHODS
 
 =cut
@@ -91,6 +93,7 @@ sub _login {
     }
 
     $ua->click;
+    $logged_in = 1;
 }
 
 =head2 get_accounts(username => $u, password => $p, memorable => $m)
@@ -257,7 +260,7 @@ no doubt have in their backend database.
 
 sub logoff {
     my $class = shift;
-    return unless $ua;
+    return unless $ua and $logged_in;
     if ($ua->follow_link( text_regex => qr/Logoff/ )) {
         $class->debug("Logged off\n");
     }
