@@ -261,6 +261,9 @@ sub logoff {
     if ($ua->follow_link( text_regex => qr/Logoff/ )) {
         $class->debug("Logged off\n");
     }
+    else {
+        warn "Couldn't find Logoff button\n";
+    }
 }
 
 1;
