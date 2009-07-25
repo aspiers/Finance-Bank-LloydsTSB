@@ -54,9 +54,10 @@ use Finance::Bank::LloydsTSB::utils qw(debug trim);
 use Finance::Bank::LloydsTSB::Account;
 
 our $ua = WWW::Mechanize->new(
-    env_proxy => 1, 
+    env_proxy  => 1, 
     keep_alive => 1, 
-    timeout => 30,
+    timeout    => 30,
+    autocheck  => 1,
 ); 
 
 =head1 CLASS METHODS
