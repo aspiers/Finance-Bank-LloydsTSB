@@ -321,12 +321,31 @@ sub download_statement {
 
     $self->ua->select('Format', 104); # download as QIF
     $self->ua->submit_form;
-    $self->debug("Got content type ", $self->ua->ct, "\n");
+    my $ok = 0;
+    my $ct = $self->ua->ct;
+    if ($ct eq 'text/x-qif') {
+      $self->debug("Got content type $ct\n");
+      $ok = 1;
+    }
+    else {
+      warn "Expected content type 'text/x-qif' but got '$ct'\n";
+    }
     my $qif = $self->ua->content;
-    
-    $self->ua->back; # so that we can still use logoff link or other links
 
-    return $qif;
+    # For some extremely weird reason, if we do this:
+
+#     # pop .qif download off stack so that we can still use other links
+#     $self->debug("Going back a page\n");
+#     $self->ua->back; 
+
+    # then $self->ua->follow_link either leads us back to the login
+    # page or gets us into a state where we can't do anything.
+
+    # A workaround is to start at the beginning:
+    $self->ua->get("https://online.lloydstsb.co.uk/customer.ibc");
+    # although this time we don't need to log in.
+
+    return ($ct, $qif);
 }
 
 1;

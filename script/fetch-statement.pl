@@ -86,7 +86,7 @@ else {
 sub download_months {
   for my $month ($start_month .. ($end_month || $start_month)) {
     print "Downloading $year/$month ...\n";
-    my $qif = $account->download_statement(
+    my ($content_type, $qif) = $account->download_statement(
       $year, $month, 1,
       # + 1 month
       5,
