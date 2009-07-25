@@ -1,6 +1,6 @@
 ---
 name: Finance-Bank-LloydsTSB
-version: 1.34
+version: 1.35
 author:
   - 'Original by Simon Cozens <simon@cpan.org>'
   - 'Improvements by Adam Spiers <aspiers@cpan.org>'
